@@ -17,7 +17,7 @@ cmake_minimum_required(VERSION 3.20)
 
 project(Singing_Trombone)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if(MSVC)
@@ -72,7 +72,14 @@ target_include_directories(${PROJECT_NAME}
         "${CMAKE_CURRENT_SOURCE_DIR}/Source"
 )
 
-file(GLOB_RECURSE src
+set(src
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/core/List.h"
+
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/model/Noise.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/model/Noise.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/model/Glottis.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/model/Glottis.cpp"
+
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginProcessor.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginProcessor.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginEditor.h"
