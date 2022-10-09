@@ -1,0 +1,5 @@
+build
+Builds
+JuceLibraryCode
+*.o
+*.obj
