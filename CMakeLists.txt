@@ -74,11 +74,25 @@ target_include_directories(${PROJECT_NAME}
 
 set(src
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/core/List.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/core/Queue.h"
 
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/model/Noise.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/model/Noise.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/model/Glottis.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/model/Glottis.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/model/Tract.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/model/Tract.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/model/VoiceProcessor.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/model/VoiceProcessor.cpp"
+
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Envelope.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Envelope.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Parameter.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Parameter.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Voice.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Voice.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Engine.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Engine.cpp"
 
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginProcessor.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginProcessor.cpp"

@@ -9,8 +9,8 @@ template <typename Item>
 struct ListNode
 {
 private:
-    Item* _prev{ nullptr };
-    Item* _next{ nullptr };
+    Item* _prev = nullptr;
+    Item* _next = nullptr;
 
     template <typename I> friend struct ListItem;
     template <typename I> friend struct List;
@@ -19,9 +19,10 @@ private:
 template <class Item>
 struct ListItem : public ListNode<ListItem<Item>>
 {
-    void appendAfter(ListItem* item) noexcept
+    void appendAfter (ListItem* item) noexcept
     {
-        assert(item != nullptr);
+        jassert (item != nullptr);
+
         this->_prev = item;
         this->_next = item->_next;
         item->_next = this;
@@ -35,11 +36,12 @@ struct ListItem : public ListNode<ListItem<Item>>
         if (this->_next != nullptr)
             this->_next->_prev = this->_prev;
 
-        this->_prev = this->_next = nullptr;
+        this->_prev = nullptr;
+        this->_next = nullptr;
     }
 
-    Item* next() noexcept { return static_cast<Item*>(this->_next); }
-    Item* prev() noexcept { return static_cast<Item*>(this->_prev); }
+    Item* next() noexcept { return static_cast<Item*> (this->_next); }
+    Item* prev() noexcept { return static_cast<Item*> (this->_prev); }
 };
 
 template <class Item>
@@ -50,20 +52,20 @@ struct List
 
     void append(Item* item) noexcept
     {
-        assert(item != nullptr);
+        jassert (item != nullptr);
 
         if (_head == nullptr) {
             _head = item;
             _tail = item;
         } else {
-            item->appendAfter(_tail);
+            item->appendAfter (_tail);
             _tail = item;
         }
     }
 
     void prepend(Item* item) noexcept
     {
-        assert(item != nullptr);
+        jassert (item != nullptr);
 
         item->_next = _head;
         _head = item;
@@ -72,9 +74,9 @@ struct List
             _tail = item;
     }
 
-    void remove(Item* item) noexcept
+    void remove (Item* item) noexcept
     {
-        assert(item != nullptr);
+        jassert (item != nullptr);
 
         if (_head == item)
             _head = item->next();
@@ -85,15 +87,15 @@ struct List
         item->remove();
     }
 
-    bool contains(Item* item) const noexcept
+    bool contains (Item* item) const noexcept
     {
-        auto* it{ _head };
+        auto* i = _head;
 
-        while (it != nullptr) {
-            if (it == item)
+        while (i != nullptr) {
+            if (i == item)
                 return true;
 
-            it = it->next();
+            i = i->next();
         }
 
         return false;
@@ -101,9 +103,9 @@ struct List
 
     Item* removeAndReturnNext(Item* item) noexcept
     {
-        Item* nextItem{ item->next() };
-        remove(item);
-        return nextItem;
+        Item* n = item->next();
+        remove (item);
+        return n;
     }
 
     bool isEmpty() const noexcept
@@ -111,9 +113,9 @@ struct List
         return _head == nullptr;
     }
 
-    Item* operator[] (int index) const noexcept
+    Item* operator[] (int index) const
     {
-        Item* it{ _head };
+        Item* it = _head;
 
         if (index >= 0) {
             while (index > 0 && it != nullptr) {
@@ -134,11 +136,8 @@ struct List
     }
 
 private:
-    using ItemBase = struct ListItem<Item>;
-    static_assert(std::derived_from<Item, ItemBase>, "List item must inherit from ListItem<>");
-
-    Item* _head{ nullptr };
-    Item* _tail{ nullptr };
+    Item* _head = nullptr;
+    Item* _tail = nullptr;
 };
 
 } // namespace core

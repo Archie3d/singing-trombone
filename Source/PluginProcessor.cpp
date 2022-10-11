@@ -75,6 +75,7 @@ void SingingTromboneProcessor::changeProgramName(int /* index */, const String& 
 
 void SingingTromboneProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    engine.prepareToPlay((float)sampleRate, samplesPerBlock);
 }
 
 void SingingTromboneProcessor::releaseResources()
@@ -141,7 +142,7 @@ void SingingTromboneProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    processMidi (midiMessages);
+    processMidi(midiMessages);
 
 
     float* outL = buffer.getWritePointer(0);
@@ -150,13 +151,14 @@ void SingingTromboneProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
     if (totalNumOutputChannels > 1)
         outR = buffer.getWritePointer(1);
 
-    // @todo
     buffer.clear();
 
-    auto timestampStop{ high_resolution_clock::now() };
-    auto duration_us{ duration_cast<microseconds> (timestampStop - timestampStart).count() };
+    engine.process(outL, outR, (size_t)buffer.getNumSamples());
 
-    const float realTime_us{ 1e6f * (float) buffer.getNumSamples() / 44100.0f }; // @todo get sample rate from prepareToPlay
+    auto timestampStop{ high_resolution_clock::now() };
+    auto duration_us{ duration_cast<microseconds>(timestampStop - timestampStart).count() };
+
+    const float realTime_us{ 1e6f * (float)buffer.getNumSamples() / engine.getSampleRate() }; // @todo get sample rate from prepareToPlay
     const float load{ duration_us / realTime_us };
 
     processLoad = jmin(1.0f, 0.99f * processLoad + 0.01f * load);
@@ -168,23 +170,8 @@ void SingingTromboneProcessor::processMidi(MidiBuffer& midiMessages)
         return;
 
     for (auto msgIter : midiMessages) {
-        const auto msg = msgIter.getMessage();
-
-        // Handle CCs
-        const int ch = msg.getChannel();
-
-        if (msg.isController()) {
-            const int cc{ msg.getControllerNumber() };
-            const float value{ float(msg.getControllerValue()) / 127.0f };
-
-            switch (cc) {
-            default:
-                break;
-            }
-        }
-
-        // @todo process notes on/off
-        // processMIDIMessage(msg);
+        const auto msg{ msgIter.getMessage() };
+        engine.processMidiMessage(msg);
     }
 }
 

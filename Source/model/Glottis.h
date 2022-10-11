@@ -8,12 +8,13 @@ namespace model {
 
 class Glottis
 {
+public:
     Glottis();
 
     void reset();
     void prepareToPlay(float sampleRate);
     float tick(float lambda, float noise);
-	float getNoiseModulator();
+	float getNoiseModulator() const;
     void finishBlock();
 
     void setFrequency(float f, bool force = false);

@@ -44,9 +44,9 @@ float Glottis::tick(float lambda, float noise)
     return out;
 }
 
-float Glottis::getNoiseModulator()
+float Glottis::getNoiseModulator() const
 {
-    const float voiced = 0.1f + 0.2f * fmax(0.0f, sin(MathConstants<float>::twoPi * timeInWaveform / waveformLength));
+    const float voiced{ 0.1f + 0.2f * fmax(0.0f, sin(MathConstants<float>::twoPi * timeInWaveform / waveformLength)) };
     return targetTenseness * intensity * voiced + (1.0f - targetTenseness * intensity) * 0.3f;
 }
 
@@ -78,10 +78,10 @@ void Glottis::finishBlock()
     else
         intensity -= 0.05f;
 
-    intensity = jlimit (0.0f, 1.0f, intensity);
+    intensity = jlimit(0.0f, 1.0f, intensity);
 }
 
-void Glottis::setFrequency(float f, bool force = false)
+void Glottis::setFrequency(float f, bool force)
 {
     targetFrequency = f;
 
