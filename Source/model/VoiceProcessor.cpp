@@ -44,7 +44,34 @@ void VoiceProcessor::trigger (const VoiceProcessor::ControlPoint& cp)
 
     fricativeIntensity = 0.0f;
 
+    glottis.setTouched(true);
+    glottis.setVibrato(0.0f);
+
     update();
+}
+
+void VoiceProcessor::retrigger(const VoiceProcessor::ControlPoint& cp)
+{
+    setControlPoint(cp);
+
+    //tongueX = cp.tongueX;
+    //tongueY = cp.tongueY;
+    //constrictionX = cp.constrictionX;
+    //constrictionY = cp.constrictionY;
+
+    //glottis.reset();
+    //tract.reset();
+
+    setTenseness(cp.tenseness);
+
+    //fricativeIntensity = 0.0f;
+
+    //update();
+}
+
+void VoiceProcessor::release()
+{
+    glottis.setTouched(false);
 }
 
 void VoiceProcessor::process(float* out, int numFrames)
@@ -77,6 +104,11 @@ void VoiceProcessor::process(float* out, int numFrames)
 void VoiceProcessor::setFrequency(float f, bool force)
 {
     glottis.setFrequency(f, force);
+}
+
+void VoiceProcessor::setVibrato(float level)
+{
+    glottis.setVibrato(level);
 }
 
 void VoiceProcessor::setTenseness(float t)

@@ -30,7 +30,7 @@ public:
      * be vocalised on note trigger. The last phoneme of the attack phrase will be sustained
      * while the note is sustained. On note release the release phrase will be vocalised.
      * The very last phoneme of the release phrase will trigger envelope release, and will be
-     * released together with the envelope.   
+     * released together with the envelope.
      */
     struct Phrase
     {
@@ -61,9 +61,11 @@ public:
 
     void prepareToPlay(float sampleRate, int samplesPerBlock);
     void trigger(const Trigger& t);
+    void retrigger(const Trigger& t);
     const Trigger& getTriggerRecord() const { return triggerRecord; }
     void release();
     void process(float* outL, float* outR, size_t numFrames);
+    bool isReleasing() const;
     bool isOver() const;
 
     void reset();
@@ -80,6 +82,8 @@ private:
     size_t phonemeIndex{};
     size_t generatedSamplesInPhoneme{};
     size_t totalSamplesInPhoneme{};
+
+    float vibratoLevel{};
 };
 
 //==============================================================================

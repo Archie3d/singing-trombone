@@ -83,6 +83,26 @@ void Voice::trigger(const Trigger& t)
     envelope.trigger(triggerRecord.envelope);
 }
 
+void Voice::retrigger(const Trigger& t)
+{
+    triggerRecord = t;
+    envelope.trigger(triggerRecord.envelope);
+
+    jassert(triggerRecord.phrase.numAttackPhonemes > 0);
+
+    attackPhase = true;
+    phonemeIndex = 0;
+    generatedSamplesInPhoneme = 0;
+    totalSamplesInPhoneme = engine.getSampleRate() * triggerRecord.phrase.attack[0].duration;
+
+    voiceProcessor.setFrequency(getNoteFrequency(triggerRecord.key), false);
+    voiceProcessor.setTenseness(triggerRecord.phrase.tenseness);
+
+    const auto cp{ getControlPointForPhoneme(triggerRecord.phrase.attack[0].symbol) };
+    voiceProcessor.retrigger(cp);
+    voiceProcessor.setVibrato(0.0f);
+}
+
 void Voice::release()
 {
     if (triggerRecord.phrase.numReleasePhonemes > 0) {
@@ -92,9 +112,11 @@ void Voice::release()
 
         const auto cp{ getControlPointForPhoneme(triggerRecord.phrase.release[0].symbol) };
         voiceProcessor.setControlPoint(cp);
+        voiceProcessor.setVibrato(0.0f);
     } else {
         // There is no release portion in the phrase
         envelope.release();
+        voiceProcessor.release();
     }
 }
 
@@ -125,6 +147,12 @@ void Voice::process(float* outL, float* outR, size_t numFrames)
                 totalSamplesInPhoneme = engine.getSampleRate() * triggerRecord.phrase.attack[phonemeIndex].duration;
             } else {
                 // Sustain the last phoneme
+                if (vibratoLevel < 1.0f) {
+                    vibratoLevel += 0.01f + vibratoLevel * 0.1f;
+                    vibratoLevel = jlimit(0.0f, 1.0f, vibratoLevel);
+                }
+
+                voiceProcessor.setVibrato(vibratoLevel);
             }
         } else {
             if (phonemeIndex < triggerRecord.phrase.numReleasePhonemes - 1) {
@@ -136,10 +164,16 @@ void Voice::process(float* outL, float* outR, size_t numFrames)
             } else {
                 // Release on the last phoneme
                 envelope.release();
+                voiceProcessor.release();
                 generatedSamplesInPhoneme = 0;
             }
         }
     }
+}
+
+bool Voice::isReleasing() const
+{
+    return envelope.getState() == Envelope::State::Release;
 }
 
 bool Voice::isOver() const
@@ -149,6 +183,7 @@ bool Voice::isOver() const
 
 void Voice::reset()
 {
+    vibratoLevel = 0.0f;
 }
 
 //==============================================================================

@@ -20,6 +20,9 @@ public:
     void setFrequency(float f, bool force = false);
     void setTenseness(float t);
 
+    void setTouched(bool b) { isTouched = b; }
+    void setVibrato(float v) { vibratoAmount = jlimit(0.0f, 1.0f, v * 0.1f); }
+
 private:
     void initWaveform(float lambda = 0.0f);
     float normalizedLFWaveform(float t);
@@ -57,9 +60,9 @@ private:
     float loudness{ 1.0f };
 	float vibratoAmount{};
 	float vibratoFrequency{ 6.0f };
-	bool autoWobble{ true };
+	bool autoWobble{ false };
 	bool isTouched{ false };
-	bool alwaysVoice{ true };
+	bool alwaysVoice{ false };
 };
 
 } // namespace model

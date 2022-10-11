@@ -25,9 +25,12 @@ public:
     void prepareToPlay(float sampleRate, int samplesPerBlock);
     void setControlPoint(const ControlPoint& cp);
     void trigger(const VoiceProcessor::ControlPoint& cp);
+    void retrigger(const VoiceProcessor::ControlPoint& cp);
+    void release();
     void process(float* out, int numFrames);
 
     void setFrequency(float f, bool force = false);
+    void setVibrato(float level);
     void setTenseness(float t);
 
 private:

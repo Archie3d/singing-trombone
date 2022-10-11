@@ -33,10 +33,12 @@ private:
 
     float sampleRate{ 44100.0f };
 
+    bool legato{ true };
+
     AudioBuffer<float> mixBuffer{};
 
     std::bitset<128> keysState{};
-    bool sustained{};    
+    bool sustained{};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Engine)
 };

@@ -18,6 +18,9 @@ void Glottis::reset()
     totalTime = 0.0f;
     intensity = 0.0f;
 
+    isTouched = false;
+    vibratoAmount = 0.0f;
+
     initWaveform();
 }
 
@@ -34,7 +37,7 @@ float Glottis::tick(float lambda, float noise)
     if (timeInWaveform > waveformLength)
     {
         timeInWaveform -= waveformLength;
-        initWaveform (lambda);
+        initWaveform(lambda);
     }
 
     float out = normalizedLFWaveform(timeInWaveform / waveformLength);
@@ -52,8 +55,8 @@ float Glottis::getNoiseModulator() const
 
 void Glottis::finishBlock()
 {
-    float vibrato = 0.0f;
-    vibrato += vibratoAmount * sin(MathConstants<float>::twoPi * totalTime * vibratoFrequency);
+    float vibrato{ 0.0f };
+    vibrato += 0.1f * vibratoAmount * sin(MathConstants<float>::twoPi * totalTime * vibratoFrequency);
     vibrato += 0.004f * simplexNoise.sample1d(totalTime * 4.07f);
     vibrato += 0.008f * simplexNoise.sample1d(totalTime * 2.15f);
 
@@ -117,17 +120,17 @@ void Glottis::initWaveform(float lambda)
     Te = Tp + Tp * Rk;
 
     epsilon = 1.0f / Ta;
-    shift = exp (-epsilon * (1.0f - Te));
+    shift = exp(-epsilon * (1.0f - Te));
     delta = 1.0f - shift;
 
     float RHSIntegral = (1.0f / epsilon) * (shift - 1.0f) + (1.0f - Te) * shift;
     RHSIntegral = RHSIntegral / delta;
 
-    float totalLowerIntegral = - (Te-Tp) / 2.0f + RHSIntegral;
+    float totalLowerIntegral = - (Te - Tp) / 2.0f + RHSIntegral;
     float totalUpperIntegral = -totalLowerIntegral;
 
     omega = MathConstants<float>::pi / Tp;
-    float s = sin (omega * Te);
+    float s = sin(omega * Te);
 
     float y = -MathConstants<float>::pi * s * totalUpperIntegral / (Tp * 2.0f);
     float z = log(y);
@@ -135,12 +138,12 @@ void Glottis::initWaveform(float lambda)
     E0 = -1.0f / (s * exp(alpha*Te));
 }
 
-float Glottis::normalizedLFWaveform (float t)
+float Glottis::normalizedLFWaveform(float t)
 {
     float output = (t > Te) ? (-exp(-epsilon * (t - Te)) + shift) / delta
                             : E0 * exp(alpha * t) * sin(omega * t);
 
-    return output * this->intensity * this->loudness;
+    return output * intensity * loudness;
 }
 
 } // namespace model

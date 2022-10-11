@@ -56,7 +56,7 @@ void Engine::processMidiMessage(const MidiMessage& msg)
 
 void Engine::updateParameters(size_t numFrames)
 {
-    // @todo 
+    // @todo
 }
 
 void Engine::noteOn(const MidiMessage& msg)
@@ -80,10 +80,21 @@ void Engine::noteOn(const MidiMessage& msg)
     // @todo Populate tenseness from global parameters
     trigger.phrase.tenseness = 0.6f;
 
-    if (auto* voice{ voicePool.trigger(trigger) }) {
-        activeVoices.append(voice);
-    } else {
-        // @todo Steal voice?
+    bool triggered{ false };
+
+    if (legato) {
+        if (auto* voice{ activeVoices.first() }) {
+            if (!voice->isReleasing()) {
+                voice->retrigger(trigger);
+                triggered = true;
+            }
+        }
+    }
+
+    if (!triggered) {
+        if (auto* voice{ voicePool.trigger(trigger) }) {
+            activeVoices.append(voice);
+        }
     }
 }
 

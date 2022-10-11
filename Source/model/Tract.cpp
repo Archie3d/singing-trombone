@@ -6,7 +6,7 @@ static inline float moveTowards(float current, float target, float amount)
 {
     if (current < target)
         return jmin(current + amount, target);
-    
+
     return jmax(current - amount, target);
 }
 
@@ -14,7 +14,7 @@ static inline float moveTowards(float current, float target, float amountUp, flo
 {
     if (current < target)
         return jmin (current + amountUp, target);
-    
+
     return jmax(current - amountDown, target);
 }
 
@@ -64,7 +64,7 @@ void Tract::reset()
     junctionOutputR.resize(tractLength + 1);
     A.resize(tractLength);
     maxAmplitude.resize(tractLength);
-    
+
     jassert(config.noseLength > 0);
     jassert(config.noseLength < config.n);
     const size_t noseLength{ (size_t)config.noseLength };
@@ -218,7 +218,7 @@ void Tract::setRestDiameter(float tongueIndex, float tongueDiameter)
 
 void Tract::setConstriction (float cindex, float cdiam, float fi)
 {
-    const float k{ float(config.n) / float(Config::defaultNumSegments) }; 
+    const float k{ float(config.n) / float(Config::defaultNumSegments) };
 
     constrictionIndex = cindex;
     constrictionDiameter = cdiam;
@@ -254,7 +254,7 @@ void Tract::setConstriction (float cindex, float cdiam, float fi)
 
             float relpos{ (intIndex + i) - constrictionIndex };
             relpos = abs(relpos) - 0.5f;
-            
+
             float shrink{};
 
             if (relpos <= 0.0f)
@@ -287,7 +287,7 @@ int Tract::getTongueIndexUpperBound() const
 
 void Tract::initialize()
 {
-    const float k{ float(config.n) / float(Config::defaultNumSegments) }; 
+    const float k{ float(config.n) / float(Config::defaultNumSegments) };
 
     for (int i = 0; i < config.n; ++i) {
         float d{ 0.0f };
@@ -309,7 +309,7 @@ void Tract::initialize()
         else
             d = 0.5f + 1.5f * (2.0f - d);
 
-        d = fmin (d, 1.9f);
+        d = jmin(d, 1.9f);
 
         noseDiameter[i] = d;
     }
@@ -334,7 +334,6 @@ void Tract::calculateReflections()
 
         newReflection[i] = (A[i] == 0.0f) ? 0.999f
                                           : (A[i - 1] - A[i]) / ( A[i - 1] + A[i]);
-
     }
 
     // At junction with nose
@@ -409,7 +408,7 @@ void Tract::reshapeTract(float deltaTime)
 {
     float amount = deltaTime * movementSpeed;
     int newLastObstruction = -1;
-    
+
     for (int i = 0; i < config.n; ++i) {
         const float d{ diameter[i] };
         const float td{ targetDiameter[i] };
@@ -425,7 +424,7 @@ void Tract::reshapeTract(float deltaTime)
             slowReturn = 1.0f;
         else
             slowReturn = 0.6f + 0.4f * (i - config.noseStart) / (config.tipStart - config.noseStart);
-        
+
         diameter[i] = moveTowards(d, td, slowReturn * amount, 2.0f * amount);
     }
 
