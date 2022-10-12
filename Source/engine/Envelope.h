@@ -1,5 +1,7 @@
 #pragma once
 
+#include <JuceHeader.h>
+
 namespace engine {
 
 /** ADSR envelope.
@@ -26,10 +28,10 @@ public:
 
     struct Spec
     {
-        float attack    { 0.0f };
+        float attack    { 0.01f };
         float decay     { 0.0f };
         float sustain   { 1.0f }; 
-        float release   { 1.0f };
+        float release   { 0.1f };
         float sampleRate{ defaultSampleRate };
     };
 
@@ -38,6 +40,7 @@ public:
     State getState() const noexcept { return currentState; }
 
     void trigger(const Spec& spec);
+    void retrigger();
     void release();
     void release(float t);
 

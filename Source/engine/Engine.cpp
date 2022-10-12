@@ -150,6 +150,10 @@ void Engine::noteOn(const MidiMessage& msg)
     Voice::Trigger trigger{};
     trigger.key = msg.getNoteNumber();
     trigger.velocity = (float)msg.getVelocity() / 127.0f;
+    trigger.envelope.sampleRate = sampleRate;
+    trigger.envelope.attack = 0.3f;
+    trigger.envelope.decay = 0.1f;
+    trigger.envelope.sustain = 0.75f;
 
     trigger.phrase = lyrics[phraseIndex];
     phraseIndex = (phraseIndex + 1) % lyricsNumPhrases;
@@ -161,10 +165,8 @@ void Engine::noteOn(const MidiMessage& msg)
 
     if (legato) {
         if (auto* voice{ activeVoices.first() }) {
-            if (!voice->isReleasing()) {
-                voice->retrigger(trigger);
-                triggered = true;
-            }
+            voice->retrigger(trigger);
+            triggered = true;
         }
     }
 

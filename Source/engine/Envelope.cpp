@@ -28,6 +28,12 @@ void Envelope::trigger(const Envelope::Spec& spec)
     currentLevel = 0.0f;
 }
 
+void Envelope::retrigger()
+{
+    if (currentState == State::Release || currentState == State::Off)
+        currentState = State::Attack;
+}
+
 void Envelope::release()
 {
     currentState = State::Release;

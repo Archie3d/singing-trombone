@@ -90,7 +90,6 @@ void Voice::prepareToPlay(float sampleRate, int samplesPerBlock)
 void Voice::trigger(const Trigger& t)
 {
     triggerRecord = t;
-    envelope.trigger(triggerRecord.envelope);
 
     jassert(triggerRecord.phrase.numAttackPhonemes > 0);
 
@@ -111,7 +110,6 @@ void Voice::trigger(const Trigger& t)
 void Voice::retrigger(const Trigger& t)
 {
     triggerRecord = t;
-    envelope.trigger(triggerRecord.envelope);
 
     jassert(triggerRecord.phrase.numAttackPhonemes > 0);
 
@@ -126,6 +124,8 @@ void Voice::retrigger(const Trigger& t)
     const auto cp{ getControlPointForPhoneme(triggerRecord.phrase.attack[0].symbol) };
     voiceProcessor.retrigger(cp);
     voiceProcessor.setVibrato(0.0f);
+
+    envelope.retrigger();
 }
 
 void Voice::release()

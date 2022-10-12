@@ -64,6 +64,8 @@ void VoiceProcessor::retrigger(const VoiceProcessor::ControlPoint& cp)
 
     setTenseness(cp.tenseness);
 
+    glottis.setTouched(true);
+
     //fricativeIntensity = 0.0f;
 
     //update();

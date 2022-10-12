@@ -108,7 +108,11 @@ void Tract::reset()
 
 void Tract::prepareToPlay(float sr, float bt)
 {
+    jassert(sr > 0.0f);
+    jassert(bt > 0.0f);
+
     sampleRate = sr;
+    sampleRate_r = 1.0f / sampleRate;
     blockTime = bt;
     transientCount = 0;
 }
@@ -124,7 +128,7 @@ void Tract::tick(float glottalOutput, float turbulenceNoise, float lambda, Glott
     junctionOutputL[config.n] = R[config.n - 1] * lipReflection;
 
     for (int i = 1; i < config.n; ++i) {
-        float r = reflection[i] * (1-lambda) + newReflection[i]*lambda;
+        float r = reflection[i] * (1 - lambda) + newReflection[i]*lambda;
         float w = r * (R[i - 1] + L[i]);
         junctionOutputR[i] = R[i - 1] - w;
         junctionOutputL[i] = L[i] + w;
@@ -134,7 +138,7 @@ void Tract::tick(float glottalOutput, float turbulenceNoise, float lambda, Glott
     {
         const int i{ config.noseStart };
         float r{ newReflectionLeft * (1.0f - lambda) + reflectionLeft * lambda };
-        junctionOutputL[i] = r * this->R[i - 1] + (1.0f + r) * (noseL[0] + L[i]);
+        junctionOutputL[i] = r * R[i - 1] + (1.0f + r) * (noseL[0] + L[i]);
         r = newReflectionRight * (1.0f - lambda) + reflectionRight * lambda;
         junctionOutputR[i] = r * L[i] + (1 + r) * (R[i - 1] + noseL[0]);
         r = newReflectionNose * (1 - lambda) + reflectionNose * lambda;
@@ -204,15 +208,17 @@ void Tract::setRestDiameter(float tongueIndex, float tongueDiameter)
     config.tongueIndex = tongueIndex;
     config.tongueDiameter = tongueDiameter;
 
+    const float fixedTongueDiameter{ 2.0f + (tongueDiameter - 2.0f) / 1.5f };
+    const float kt{ 1.1f * MathConstants<float>::pi / (float)(config.tipStart - config.bladeStart) };
+    const float kcurve{ 1.5f - fixedTongueDiameter + 1.7f };
+
     for (int i = config.bladeStart; i < config.lipStart; ++i) {
-        const float t{ 1.1f * MathConstants<float>::pi * (float)(tongueIndex - i) / (float)(config.tipStart - config.bladeStart) };
-        const float fixedTongueDiameter{ 2.0f + (tongueDiameter - 2.0f) / 1.5f };
-        float curve{ (1.5f - fixedTongueDiameter + 1.7f) * cos(t) };
+        const float t{ kt * (float)(tongueIndex - i) };
+        float curve{ kcurve * cos(t) };
 
         if (i == config.bladeStart - 2 || i == config.lipStart - 1)
             curve *= 0.8f;
-
-        if (i == config.bladeStart || i == config.lipStart - 2)
+        else if (i == config.bladeStart || i == config.lipStart - 2)
             curve *= 0.94f;
 
         restDiameter[i] = 1.5f - curve;
@@ -447,22 +453,23 @@ void Tract::reshapeTract(float deltaTime)
 
 void Tract::processTransients()
 {
+    const float dt{ 0.5f * sampleRate_r };
+
     for (auto& trans : transients) {
         if (trans.living) {
-            const float newTimeAlive{ trans.timeAlive + 1.0f / (sampleRate * 2.0f) };
+            const float newTimeAlive{ trans.timeAlive + dt };
 
             if (newTimeAlive > trans.lifeTime) {
                 trans.living = false;
             } else {
-                const float amplitude{ trans.strength * pow(2.0f, -trans.exponent * trans.timeAlive) };
-                L[trans.position] += amplitude * 0.5f;
-                R[trans.position] += amplitude * 0.5f;
+                const float amplitude{ 0.5f * trans.strength * pow(2.0f, -trans.exponent * trans.timeAlive) };
+                L[trans.position] += amplitude;
+                R[trans.position] += amplitude;
             }
 
             trans.timeAlive = newTimeAlive;
         }
     }
 }
-
 
 } // namespace model

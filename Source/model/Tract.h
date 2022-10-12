@@ -71,6 +71,7 @@ private:
 
     Config config{};
     float sampleRate{ 44100.0f };
+    float sampleRate_r { 1.0f / sampleRate };
     float blockTime{ 512.0f / sampleRate };
 
     float glottalReflection{ 0.75f };
