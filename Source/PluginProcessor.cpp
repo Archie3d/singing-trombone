@@ -8,6 +8,7 @@ using namespace juce;
 SingingTromboneProcessor::SingingTromboneProcessor()
     : AudioProcessor(getBusesProperties())
 {
+    startTimerHz(30);
 }
 
 SingingTromboneProcessor::~SingingTromboneProcessor() = default;
@@ -129,21 +130,27 @@ void SingingTromboneProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
     auto timestampStart{ high_resolution_clock::now() };
 
     juce::ScopedNoDenormals noDenormals;
+
+    if (auto* playHead{ getPlayHead() }) {
+        AudioPlayHead::CurrentPositionInfo pos{};
+        playHead->getCurrentPosition(pos);
+
+        if (pos.timeInSamples < timeInSamples) {
+            engine.rewind();
+        }
+
+        timeInSamples = pos.timeInSamples;
+    }
     
     const auto totalNumInputChannels { getTotalNumInputChannels() };
     const auto totalNumOutputChannels{ getTotalNumOutputChannels() };
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
     processMidi(midiMessages);
 
+    engine.processLyrics();
 
     float* outL = buffer.getWritePointer(0);
     float* outR = outL;
@@ -191,6 +198,28 @@ void SingingTromboneProcessor::getStateInformation (juce::MemoryBlock& destData)
 
 void SingingTromboneProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
+}
+
+Result SingingTromboneProcessor::setLyrics(const String& str)
+{
+    return engine.setLyrics(str);
+}
+
+void SingingTromboneProcessor::setLegato(bool legato)
+{
+    engine.setLegato(legato);
+}
+
+bool SingingTromboneProcessor::isLegato() const
+{
+    return engine.isLegato();
+}
+
+//==============================================================================
+
+void SingingTromboneProcessor::timerCallback()
+{
+    engine.performHousekeeping();
 }
 
 //==============================================================================

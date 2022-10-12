@@ -91,6 +91,8 @@ set(src
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Parameter.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Voice.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Voice.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Lyrics.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Lyrics.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Engine.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Engine.cpp"
 

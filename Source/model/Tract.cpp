@@ -47,6 +47,12 @@ Tract::Tract()
 {
 }
 
+void Tract::reset(const Config& cfg)
+{
+    config = cfg;
+    reset();
+}
+
 void Tract::reset()
 {
     jassert(config.n > 0);

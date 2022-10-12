@@ -54,6 +54,85 @@ void Engine::processMidiMessage(const MidiMessage& msg)
         controlChange(msg);
 }
 
+void Engine::processLyrics()
+{
+    Lyrics::Ptr lyricsPtr{};
+    Lyrics::Ptr ptr{};
+
+    do {
+        if (lyricsPtr != nullptr)
+            disposeLyricsQueue.send(lyricsPtr);
+
+        lyricsPtr = ptr;
+    } while (setLyricsQueue.receive(ptr));
+
+    if (lyricsPtr == nullptr)
+        return;
+
+    jassert(lyricsPtr == ptr);
+
+    size_t numPhrases{ jmin(lyricsPtr->size(), lyricsMaxPhrases) };
+
+    for (size_t i = 0; i < numPhrases; ++i) {
+        const auto& phrase{ lyricsPtr->operator[](i) };
+
+        lyrics[i].parse(phrase.attack, phrase.release);
+    }
+
+    lyricsNumPhrases = numPhrases;
+    phraseIndex = 0;
+
+    disposeLyricsQueue.send(lyricsPtr);
+}
+
+Result Engine::setLyrics(const String& str)
+{
+    auto lyricsPtr{ std::make_shared<Lyrics>() };
+    auto res{ lyricsPtr->parse(str) };
+
+    if (res.wasOk()) {
+        return setLyrics(lyricsPtr);
+    }
+
+    return res;
+}
+
+void Engine::rewind()
+{
+    phraseIndex = 0;
+}
+
+Result Engine::setLyrics(const Lyrics::Ptr& ptr)
+{
+    if (setLyricsQueue.send(ptr)) {
+        cachedLyrics = ptr;
+        return Result::ok();
+    }
+
+    return Result::fail("Queue is full");
+}
+
+Lyrics::Phrase Engine::getCurrentPhrase() const
+{
+    if (cachedLyrics != nullptr) {
+        size_t idx{ getCurrentPhraseIndex() };
+
+        if (idx < cachedLyrics->size()) {
+            return cachedLyrics->operator[](idx);
+        }
+    }
+
+    return {};
+}
+
+void Engine::performHousekeeping()
+{
+    Lyrics::Ptr ptr{};
+
+    while (disposeLyricsQueue.receive(ptr))
+        ptr.reset();
+}
+
 void Engine::updateParameters(size_t numFrames)
 {
     // @todo
@@ -63,19 +142,17 @@ void Engine::noteOn(const MidiMessage& msg)
 {
     keysState.set(msg.getNoteNumber());
 
+    if (phraseIndex >= lyricsNumPhrases) {
+        // No lyrics available
+        return;
+    }
+
     Voice::Trigger trigger{};
     trigger.key = msg.getNoteNumber();
     trigger.velocity = (float)msg.getVelocity() / 127.0f;
 
-    // @todo populate trigger.phrase
-    //       Here we should pull the next phrase from the engine and
-    //       place it into the trigger phrase structure.
-
-    // This is a placeholder that vocalises the 'a-o' phrase.
-    trigger.phrase.attack[0] = { 'a', 0.1f };
-    trigger.phrase.numAttackPhonemes = 1;
-    trigger.phrase.release[0] = { 'o', 0.1f };
-    trigger.phrase.numReleasePhonemes = 1;
+    trigger.phrase = lyrics[phraseIndex];
+    phraseIndex = (phraseIndex + 1) % lyricsNumPhrases;
 
     // @todo Populate tenseness from global parameters
     trigger.phrase.tenseness = 0.6f;

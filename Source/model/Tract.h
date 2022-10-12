@@ -43,6 +43,7 @@ public:
     Tract();
 
     void reset();
+    void reset(const Config& cfg);
     void prepareToPlay(float sampleRate, float blockTime);
     void tick(float glottalOutput, float turbulenceNoise, float lambda, Glottis& glottis);
     void finishBlock();

@@ -43,6 +43,8 @@ public:
         size_t numReleasePhonemes{};
 
         float tenseness{ 0.6f };
+
+        void parse(const String& a, const String& r);
     };
 
     /**

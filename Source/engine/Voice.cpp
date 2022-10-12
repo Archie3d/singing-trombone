@@ -50,6 +50,31 @@ static float getNoteFrequency(int noteNumber)
     return 440.0f * powf(2.0f, float(noteNumber - 69) / 12.0f);
 }
 
+template<size_t S>
+static size_t phonemesFromString(const String& str, std::array<Voice::Phoneme, S>& target)
+{
+    const char* aStr{ str.getCharPointer().getAddress() };
+    size_t i = 0;
+
+    while (i < target.size() && aStr[i] != '\0') {
+        target[i].symbol = aStr[i];
+        ++i;
+    }
+
+    return i;
+}
+
+//==============================================================================
+
+void Voice::Phrase::parse(const String& a, const String& r)
+{
+    const char* aStr{ a.getCharPointer().getAddress() };
+    const char* rStr{ r.getCharPointer().getAddress() };
+
+    numAttackPhonemes = phonemesFromString(aStr, attack);
+    numReleasePhonemes = phonemesFromString(rStr, release);
+}
+
 //==============================================================================
 
 Voice::Voice(Engine& eng)

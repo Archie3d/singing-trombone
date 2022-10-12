@@ -5,7 +5,8 @@
 
 #include "engine/Engine.h"
 
-class SingingTromboneProcessor : public juce::AudioProcessor
+class SingingTromboneProcessor : public juce::AudioProcessor,
+                                 private juce::Timer
 {
 public:
     SingingTromboneProcessor();
@@ -47,12 +48,21 @@ public:
     float getProcessLoad() const noexcept { return processLoad.load(); }
     int getActiveVoiceCount() const noexcept { return engine.getVoiceCount(); }
 
+    Result setLyrics(const String& lyrics);
+    void setLegato(bool legato);
+    bool isLegato() const;
+
 private:
+
+    // juce::Timer
+    void timerCallback() override;
 
     static BusesProperties getBusesProperties();
 
     engine::Engine engine{};
     std::atomic<float> processLoad{};
+
+    int64 timeInSamples{};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SingingTromboneProcessor)
 };
