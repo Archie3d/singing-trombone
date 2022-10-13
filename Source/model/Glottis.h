@@ -21,7 +21,7 @@ public:
     void setTenseness(float t);
 
     void setTouched(bool b) { isTouched = b; }
-    void setVibrato(float v) { vibratoAmount = jlimit(0.0f, 1.0f, v * 0.1f); }
+    void setVibrato(float v) { vibratoAmount = jlimit(0.0f, 1.0f, v); }
 
 private:
     void initWaveform(float lambda = 0.0f);

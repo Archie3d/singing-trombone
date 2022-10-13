@@ -72,8 +72,6 @@ private:
     AudioBuffer<float> mixBuffer{ NUM_CHANNELS, SUB_FRAME_LENGTH };
     size_t remainedSamples{};
 
-
-
     std::bitset<128> keysState{};
     bool sustained{};
 

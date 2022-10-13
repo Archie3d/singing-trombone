@@ -59,7 +59,7 @@ float Glottis::getNoiseModulator() const
 void Glottis::finishBlock()
 {
     float vibrato{ 0.0f };
-    vibrato += 0.1f * vibratoAmount * sin(MathConstants<float>::twoPi * totalTime * vibratoFrequency);
+    vibrato += 0.02f * vibratoAmount * sin(MathConstants<float>::twoPi * totalTime * vibratoFrequency);
     vibrato += 0.004f * simplexNoise.sample1d(totalTime * 4.07f);
     vibrato += 0.008f * simplexNoise.sample1d(totalTime * 2.15f);
 

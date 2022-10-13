@@ -173,7 +173,7 @@ void Voice::process(float* outL, float* outR, size_t numFrames)
             } else {
                 // Sustain the last phoneme
                 if (vibratoLevel < 1.0f) {
-                    vibratoLevel += 0.01f + vibratoLevel * 0.1f;
+                    vibratoLevel += 0.01f + vibratoLevel * 0.02f;
                     vibratoLevel = jlimit(0.0f, 1.0f, vibratoLevel);
                 }
 
