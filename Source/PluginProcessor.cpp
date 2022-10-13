@@ -6,12 +6,24 @@
 using namespace juce;
 
 SingingTromboneProcessor::SingingTromboneProcessor()
-    : AudioProcessor(getBusesProperties())
+    : AudioProcessor(getBusesProperties()),
+      parameters(*this)
 {
     startTimerHz(30);
 }
 
 SingingTromboneProcessor::~SingingTromboneProcessor() = default;
+
+void SingingTromboneProcessor::addListener(Listener* listener)
+{
+    jassert(listener != nullptr);
+    listeners.add(listener);
+}
+
+void SingingTromboneProcessor::removeListener(Listener* listener)
+{
+    listeners.remove(listener);
+}
 
 const juce::String SingingTromboneProcessor::getName() const
 {
@@ -141,7 +153,7 @@ void SingingTromboneProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
 
         timeInSamples = pos.timeInSamples;
     }
-    
+
     const auto totalNumInputChannels { getTotalNumInputChannels() };
     const auto totalNumOutputChannels{ getTotalNumOutputChannels() };
 
@@ -194,15 +206,28 @@ juce::AudioProcessorEditor* SingingTromboneProcessor::createEditor()
 
 void SingingTromboneProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
+    parameters.lyrics = lyricsDocument.getAllContent();
+
+    MemoryOutputStream stream(destData, false);
+    parameters.serialize(stream);
 }
 
 void SingingTromboneProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
+    jassert(data != nullptr);
+
+    MemoryInputStream stream(data, sizeInBytes, false);
+    parameters.deserialize(stream);
+
+    lyricsDocument.replaceAllContent(parameters.lyrics);
+    updateLyrics();
+
+    listeners.call(&Listener::processorStateChanged);
 }
 
-Result SingingTromboneProcessor::setLyrics(const String& str)
+Result SingingTromboneProcessor::updateLyrics()
 {
-    return engine.setLyrics(str);
+    return engine.setLyrics(lyricsDocument.getAllContent());
 }
 
 void SingingTromboneProcessor::setLegato(bool legato)

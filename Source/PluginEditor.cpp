@@ -6,11 +6,10 @@ using namespace juce;
 SingingTromboneEditor::SingingTromboneEditor (SingingTromboneProcessor& p)
     : AudioProcessorEditor(&p),
       audioProcessor(p),
-      lyrics(),
-      lyricsEditor(lyrics, nullptr),
+      lyricsEditor(audioProcessor.getLyricsDocument(), nullptr),
       updateButton("Update")
 {
-    setSize (400, 300);
+    setSize(600, 400);
     setResizeLimits(200, 200, 4096, 4096);
 
     addAndMakeVisible(lyricsEditor);
@@ -21,10 +20,16 @@ SingingTromboneEditor::SingingTromboneEditor (SingingTromboneProcessor& p)
     };
 
     resized();
+
+    audioProcessor.addListener(this);
+
     startTimerHz(10);
 }
 
-SingingTromboneEditor::~SingingTromboneEditor() = default;
+SingingTromboneEditor::~SingingTromboneEditor()
+{
+    audioProcessor.removeListener(this);
+}
 
 void SingingTromboneEditor::paint (juce::Graphics& g)
 {
@@ -43,7 +48,7 @@ void SingingTromboneEditor::resized()
 
 void SingingTromboneEditor::updateLyrics()
 {
-    auto res{ audioProcessor.setLyrics(lyrics.getAllContent()) };
+    auto res{ audioProcessor.updateLyrics() };
 
     if (res.failed()) {
         AlertWindow::showMessageBoxAsync(MessageBoxIconType::WarningIcon, "Error", res.getErrorMessage(), "OK");
@@ -52,5 +57,10 @@ void SingingTromboneEditor::updateLyrics()
 
 void SingingTromboneEditor::timerCallback()
 {
-    // @todo Update meters 
+    // @todo Update meters
+}
+
+void SingingTromboneEditor::processorStateChanged()
+{
+    //
 }

@@ -23,8 +23,6 @@ void Engine::prepareToPlay(float sr, int samplesPerBlock)
 
 void Engine::process(float* outL, float* outR, size_t numFrames)
 {
-    jassert(numFrames <= mixBuffer.getNumSamples());
-
     float* origOutL{ outL };
     float* origOutR{ outR };
     size_t origNumFrames{ numFrames };
@@ -169,6 +167,7 @@ void Engine::noteOn(const MidiMessage& msg)
     trigger.envelope.attack = 0.3f;
     trigger.envelope.decay = 0.1f;
     trigger.envelope.sustain = 0.75f;
+    trigger.envelope.release = 0.3f;
 
     trigger.phrase = lyrics[phraseIndex];
     phraseIndex = (phraseIndex + 1) % lyricsNumPhrases;

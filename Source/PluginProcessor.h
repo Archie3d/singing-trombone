@@ -3,14 +3,26 @@
 #include <JuceHeader.h>
 #include <atomic>
 
+#include "PluginParameters.h"
 #include "engine/Engine.h"
 
 class SingingTromboneProcessor : public juce::AudioProcessor,
                                  private juce::Timer
 {
 public:
+
+    class Listener
+    {
+    public:
+        virtual void processorStateChanged() = 0;
+        virtual ~Listener() = default;
+    };
+
     SingingTromboneProcessor();
-    ~SingingTromboneProcessor() override;
+    ~SingingTromboneProcessor();
+
+    void addListener(Listener* listener);
+    void removeListener(Listener* listener);
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -48,7 +60,9 @@ public:
     float getProcessLoad() const noexcept { return processLoad.load(); }
     int getActiveVoiceCount() const noexcept { return engine.getVoiceCount(); }
 
-    Result setLyrics(const String& lyrics);
+    CodeDocument& getLyricsDocument() { return lyricsDocument; }
+
+    Result updateLyrics();
     void setLegato(bool legato);
     bool isLegato() const;
 
@@ -63,6 +77,13 @@ private:
     std::atomic<float> processLoad{};
 
     int64 timeInSamples{};
+
+    ListenerList<Listener> listeners{};
+
+    CodeDocument lyricsDocument{};
+
+    PluginParameters parameters;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SingingTromboneProcessor)
 };

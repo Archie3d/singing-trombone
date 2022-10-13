@@ -4,7 +4,8 @@
 #include "PluginProcessor.h"
 
 class SingingTromboneEditor : public juce::AudioProcessorEditor,
-                              public juce::Timer
+                              public juce::Timer,
+                              public SingingTromboneProcessor::Listener
 {
 public:
     SingingTromboneEditor (SingingTromboneProcessor&);
@@ -18,11 +19,13 @@ public:
     // juce::Timer
     void timerCallback() override;
 
+    // SingingTromboneProcessor::Listener
+    void processorStateChanged() override;
+
 private:
 
     SingingTromboneProcessor& audioProcessor;
 
-    CodeDocument lyrics;
     CodeEditorComponent lyricsEditor;
     TextButton updateButton;
 

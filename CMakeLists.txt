@@ -100,6 +100,8 @@ set(src
 
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginProcessor.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginProcessor.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginParameters.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginParameters.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginEditor.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginEditor.cpp"
 )
