@@ -24,9 +24,12 @@ void Glottis::reset()
     initWaveform();
 }
 
-void Glottis::prepareToPlay(float sampleRate)
+void Glottis::prepareToPlay(float sampleRate, float timePerBlock)
 {
     sampleRate_r = 1.0f / sampleRate;
+
+    // Original implementation smoothing was tuned for the block size of about 512 samples to be 1.1
+    smoothRate = 1.0f + 10.0f * log(1.0f + timePerBlock);
 }
 
 float Glottis::tick(float lambda, float noise)
@@ -61,10 +64,10 @@ void Glottis::finishBlock()
     vibrato += 0.008f * simplexNoise.sample1d(totalTime * 2.15f);
 
     if (targetFrequency > smoothFrequency)
-        smoothFrequency = fmin (smoothFrequency * 1.1f, targetFrequency);
+        smoothFrequency = jmin(smoothFrequency * smoothRate, targetFrequency);
 
     if (targetFrequency < smoothFrequency)
-        smoothFrequency = fmax (smoothFrequency / 1.1f, targetFrequency);
+        smoothFrequency = jmax(smoothFrequency / smoothRate, targetFrequency);
 
     oldFrequency = newFrequency;
     newFrequency = smoothFrequency * (1.0f + vibrato);

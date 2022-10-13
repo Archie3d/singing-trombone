@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include <bitset>
 #include "core/Queue.h"
+#include "engine/Interpolator.h"
 #include "engine/Voice.h"
 #include "engine/Lyrics.h"
 
@@ -11,6 +12,14 @@ namespace engine {
 class Engine final
 {
 public:
+
+    constexpr static float INTERNAL_SAMPLE_RATE = 44100.0f;
+    constexpr static float INTERNAL_SAMPLE_RATE_R = 1.0f / INTERNAL_SAMPLE_RATE;
+
+    constexpr static size_t NUM_CHANNELS = 2;
+
+    constexpr static size_t SUB_FRAME_LENGTH = 32;
+
     Engine();
 
     void prepareToPlay(float sampleRate, int samplesPerBlock);
@@ -19,7 +28,7 @@ public:
     void processMidiMessage(const MidiMessage& msg);
     void processLyrics();
 
-    float getSampleRate() const { return sampleRate; }
+    float getExternalSampleRate() const { return externalSampleRate; }
 
     int getVoiceCount() const { return voicePool.getVoiceCount(); }
 
@@ -50,14 +59,20 @@ private:
     void controlChange(const MidiMessage& msg);
     void releaseSustainedVoices();
 
+    void processSubFrame();
+
     VoicePool voicePool;
     core::List<Voice> activeVoices{};
 
-    float sampleRate{ 44100.0f };
+    float externalSampleRate{ 44100.0f };
 
     std::atomic<bool> legato{ true };
 
-    AudioBuffer<float> mixBuffer{};
+    AudioBuffer<float> subFrameBuffer{ NUM_CHANNELS, SUB_FRAME_LENGTH };
+    AudioBuffer<float> mixBuffer{ NUM_CHANNELS, SUB_FRAME_LENGTH };
+    size_t remainedSamples{};
+
+
 
     std::bitset<128> keysState{};
     bool sustained{};
@@ -72,6 +87,8 @@ private:
     std::atomic<size_t> phraseIndex{};
 
     Lyrics::Ptr cachedLyrics{};
+
+    Interpolator interpolator{1.0f, NUM_CHANNELS};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Engine)
 };

@@ -96,7 +96,7 @@ void Voice::trigger(const Trigger& t)
     attackPhase = true;
     phonemeIndex = 0;
     generatedSamplesInPhoneme = 0;
-    totalSamplesInPhoneme = engine.getSampleRate() * triggerRecord.phrase.attack[0].duration;
+    totalSamplesInPhoneme = Engine::INTERNAL_SAMPLE_RATE * triggerRecord.phrase.attack[0].duration;
 
     voiceProcessor.setFrequency(getNoteFrequency(triggerRecord.key), true);
     voiceProcessor.setTenseness(triggerRecord.phrase.tenseness);
@@ -116,7 +116,7 @@ void Voice::retrigger(const Trigger& t)
     attackPhase = true;
     phonemeIndex = 0;
     generatedSamplesInPhoneme = 0;
-    totalSamplesInPhoneme = engine.getSampleRate() * triggerRecord.phrase.attack[0].duration;
+    totalSamplesInPhoneme = Engine::INTERNAL_SAMPLE_RATE * triggerRecord.phrase.attack[0].duration;
 
     voiceProcessor.setFrequency(getNoteFrequency(triggerRecord.key), false);
     voiceProcessor.setTenseness(triggerRecord.phrase.tenseness);
@@ -169,7 +169,7 @@ void Voice::process(float* outL, float* outR, size_t numFrames)
                 const char nextSymbol{ triggerRecord.phrase.attack[phonemeIndex].symbol };
                 const auto cp{ getControlPointForPhoneme(nextSymbol) };
                 voiceProcessor.setControlPoint(cp);
-                totalSamplesInPhoneme = engine.getSampleRate() * triggerRecord.phrase.attack[phonemeIndex].duration;
+                totalSamplesInPhoneme = Engine::INTERNAL_SAMPLE_RATE * triggerRecord.phrase.attack[phonemeIndex].duration;
             } else {
                 // Sustain the last phoneme
                 if (vibratoLevel < 1.0f) {
@@ -185,7 +185,7 @@ void Voice::process(float* outL, float* outR, size_t numFrames)
                 const char nextSymbol{ triggerRecord.phrase.release[phonemeIndex].symbol };
                 const auto cp{ getControlPointForPhoneme(nextSymbol) };
                 voiceProcessor.setControlPoint(cp);
-                totalSamplesInPhoneme = engine.getSampleRate() * triggerRecord.phrase.release[phonemeIndex].duration;
+                totalSamplesInPhoneme = Engine::INTERNAL_SAMPLE_RATE * triggerRecord.phrase.release[phonemeIndex].duration;
             } else {
                 // Release on the last phoneme
                 envelope.release();

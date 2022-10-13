@@ -165,7 +165,7 @@ void SingingTromboneProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
     auto timestampStop{ high_resolution_clock::now() };
     auto duration_us{ duration_cast<microseconds>(timestampStop - timestampStart).count() };
 
-    const float realTime_us{ 1e6f * (float)buffer.getNumSamples() / engine.getSampleRate() }; // @todo get sample rate from prepareToPlay
+    const float realTime_us{ 1e6f * (float)buffer.getNumSamples() / engine.getExternalSampleRate() }; // @todo get sample rate from prepareToPlay
     const float load{ duration_us / realTime_us };
 
     processLoad = jmin(1.0f, 0.99f * processLoad + 0.01f * load);

@@ -89,6 +89,8 @@ set(src
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Envelope.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Parameter.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Parameter.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Interpolator.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Interpolator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Voice.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Voice.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/engine/Lyrics.h"

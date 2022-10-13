@@ -18,9 +18,9 @@ void VoiceProcessor::prepareToPlay(float sampleRate, int samplesPerBlock)
 
     timePerBlock = float(samplesPerBlock) / sampleRate;
 
-    glottis.prepareToPlay (sampleRate);
-    tract.prepareToPlay (sampleRate, timePerBlock);
-    whiteNoise.setSeed (Time::currentTimeMillis());
+    glottis.prepareToPlay(sampleRate, timePerBlock);
+    tract.prepareToPlay(sampleRate, timePerBlock);
+    whiteNoise.setSeed(Time::currentTimeMillis());
 }
 
 void VoiceProcessor::setControlPoint(const VoiceProcessor::ControlPoint& cp)
@@ -28,7 +28,7 @@ void VoiceProcessor::setControlPoint(const VoiceProcessor::ControlPoint& cp)
     targetControlPoint = cp;
 }
 
-void VoiceProcessor::trigger (const VoiceProcessor::ControlPoint& cp)
+void VoiceProcessor::trigger(const VoiceProcessor::ControlPoint& cp)
 {
     setControlPoint(cp);
 

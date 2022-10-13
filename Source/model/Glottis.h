@@ -12,7 +12,7 @@ public:
     Glottis();
 
     void reset();
-    void prepareToPlay(float sampleRate);
+    void prepareToPlay(float sampleRate, float timePerBlock);
     float tick(float lambda, float noise);
 	float getNoiseModulator() const;
     void finishBlock();
@@ -30,6 +30,7 @@ private:
 	SimplexNoise simplexNoise{};
 
     float sampleRate_r{ 1.0f / 44100.0f };
+    float smoothRate{ 1.0f };
     float timeInWaveform{};
     float waveformLength{};
 

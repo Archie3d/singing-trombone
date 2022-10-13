@@ -9,9 +9,14 @@ Engine::Engine()
 
 void Engine::prepareToPlay(float sr, int samplesPerBlock)
 {
-    sampleRate = sr;
-    voicePool.prepareToPlay(sampleRate, samplesPerBlock);
-    mixBuffer.setSize(2, samplesPerBlock);
+    externalSampleRate = sr;
+
+    interpolator.setRatio(INTERNAL_SAMPLE_RATE / externalSampleRate);
+    interpolator.reset();
+    remainedSamples = 0;
+
+    voicePool.prepareToPlay(INTERNAL_SAMPLE_RATE, SUB_FRAME_LENGTH);
+
     keysState.reset();
     sustained = false;
 }
@@ -20,24 +25,34 @@ void Engine::process(float* outL, float* outR, size_t numFrames)
 {
     jassert(numFrames <= mixBuffer.getNumSamples());
 
-    auto* voice{ activeVoices.first() };
+    float* origOutL{ outL };
+    float* origOutR{ outR };
+    size_t origNumFrames{ numFrames };
 
-    while (voice != nullptr) {
-        float* mixL{ mixBuffer.getWritePointer(0) };
-        float* mixR{ mixBuffer.getWritePointer(1) };
-        voice->process(mixL, mixR, numFrames);
+    while (numFrames > 0) {
+        if (remainedSamples > 0) {
+            const size_t idx = SUB_FRAME_LENGTH - remainedSamples;
+            const float* subL{ subFrameBuffer.getReadPointer(0, idx) };
+            const float* subR{ subFrameBuffer.getReadPointer(1, idx) };
 
-        for (size_t i = 0; i < numFrames; ++i) {
-            outL[i] += mixL[i];
-            outR[i] += mixR[i];
+            while (remainedSamples > 0 && interpolator.canWrite()) {
+                interpolator.write(*subL, *subR);
+                --remainedSamples;
+                subL += 1;
+                subR += 1;
+            }
+
+            while (numFrames > 0 && interpolator.canRead()) {
+                interpolator.read(*outL, *outR);
+                numFrames -= 1;
+                outL += 1;
+                outR += 1;
+            }
         }
 
-        if (voice->isOver()) {
-            auto* nextVoice{ activeVoices.removeAndReturnNext(voice) };
-            voicePool.recycle(voice);
-            voice = nextVoice;
-        } else {
-            voice = voice->next();
+        if (remainedSamples == 0 && numFrames > 0) {
+            processSubFrame();
+            jassert(remainedSamples > 0);
         }
     }
 
@@ -150,7 +165,7 @@ void Engine::noteOn(const MidiMessage& msg)
     Voice::Trigger trigger{};
     trigger.key = msg.getNoteNumber();
     trigger.velocity = (float)msg.getVelocity() / 127.0f;
-    trigger.envelope.sampleRate = sampleRate;
+    trigger.envelope.sampleRate = INTERNAL_SAMPLE_RATE;
     trigger.envelope.attack = 0.3f;
     trigger.envelope.decay = 0.1f;
     trigger.envelope.sustain = 0.75f;
@@ -218,6 +233,39 @@ void Engine::releaseSustainedVoices()
 
         voice = voice->next();
     }
+}
+
+void Engine::processSubFrame()
+{
+    subFrameBuffer.clear();
+    mixBuffer.clear();
+
+    float* outL{ subFrameBuffer.getWritePointer(0) };
+    float* outR{ subFrameBuffer.getWritePointer(1) };
+
+    auto* voice{ activeVoices.first() };
+
+    while (voice != nullptr) {
+        float* mixL{ mixBuffer.getWritePointer(0) };
+        float* mixR{ mixBuffer.getWritePointer(1) };
+        voice->process(mixL, mixR, SUB_FRAME_LENGTH);
+
+        for (size_t i = 0; i < SUB_FRAME_LENGTH; ++i) {
+            outL[i] += mixL[i];
+            outR[i] += mixR[i];
+        }
+
+        if (voice->isOver()) {
+            auto* nextVoice{ activeVoices.removeAndReturnNext(voice) };
+            voicePool.recycle(voice);
+            voice = nextVoice;
+        } else {
+            voice = voice->next();
+        }
+
+    }
+
+    remainedSamples = SUB_FRAME_LENGTH;
 }
 
 } // namespace engine
