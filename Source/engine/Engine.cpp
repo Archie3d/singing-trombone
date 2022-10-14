@@ -126,17 +126,24 @@ Result Engine::setLyrics(const Lyrics::Ptr& ptr)
     return Result::fail("Queue is full");
 }
 
-Lyrics::Phrase Engine::getCurrentPhrase() const
+const Lyrics::Phrase& Engine::getCurrentPhrase() const
 {
+    const static Lyrics::Phrase dummy{};
+
     if (cachedLyrics != nullptr) {
         size_t idx{ getCurrentPhraseIndex() };
+
+        if (idx == 0)
+            idx = cachedLyrics->size();
+
+        --idx;
 
         if (idx < cachedLyrics->size()) {
             return cachedLyrics->operator[](idx);
         }
     }
 
-    return {};
+    return dummy;
 }
 
 void Engine::performHousekeeping()

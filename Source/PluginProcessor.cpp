@@ -267,6 +267,11 @@ Result SingingTromboneProcessor::updateLyrics()
     return engine.setLyrics(lyricsDocument.getAllContent());
 }
 
+engine::Lyrics::Phrase SingingTromboneProcessor::getCurrentLyricsPhrase() const
+{
+    return engine.getCurrentPhrase();
+}
+
 void SingingTromboneProcessor::updateParameters()
 {
     engine.setVolume(parameters.volume->get());

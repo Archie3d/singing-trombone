@@ -63,6 +63,7 @@ public:
     CodeDocument& getLyricsDocument() { return lyricsDocument; }
 
     Result updateLyrics();
+    engine::Lyrics::Phrase getCurrentLyricsPhrase() const;
 
     void updateParameters();
 

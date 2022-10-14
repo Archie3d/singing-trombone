@@ -79,7 +79,7 @@ public:
 
     size_t getNumPhrases() const { return lyricsNumPhrases.load(); }
     size_t getCurrentPhraseIndex() const { return phraseIndex.load(); }
-    Lyrics::Phrase getCurrentPhrase() const;
+    const Lyrics::Phrase& getCurrentPhrase() const;
 
     const ParameterPool& getParameters() const { return parameters; }
 

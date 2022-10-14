@@ -49,5 +49,7 @@ private:
 
     ToggleButton legatoToggleButton{ "Legato" };
 
+    Range<int> highlightRegion{};
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SingingTromboneEditor)
 };

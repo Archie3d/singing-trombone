@@ -12,13 +12,15 @@ public:
 
     struct Phrase
     {
-        String attack;
-        String release;
+        String attack{};
+        String release{};
+        Range<int> position{};
     };
 
     Lyrics();
     virtual ~Lyrics() = default;
     void clear();
+    Result parse0(const String& str);
     Result parse(const String& str);
 
     size_t size() const { return phrases.size(); }

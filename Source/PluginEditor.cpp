@@ -109,6 +109,14 @@ void SingingTromboneEditor::timerCallback()
     vibratoSlider.setValue(params.vibratoIntensity->get(), dontSendNotification);
 
     legatoToggleButton.setToggleState(params.legatoEnabled->get(), dontSendNotification);
+
+    auto phrase{ audioProcessor.getCurrentLyricsPhrase() };
+    auto currentRegion{ lyricsEditor.getHighlightedRegion() };
+
+    if (highlightRegion != phrase.position) {
+        highlightRegion = phrase.position;
+        lyricsEditor.setHighlightedRegion(highlightRegion);
+    }
 }
 
 void SingingTromboneEditor::processorStateChanged()
