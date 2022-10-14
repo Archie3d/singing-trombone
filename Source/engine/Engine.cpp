@@ -164,11 +164,13 @@ void Engine::noteOn(const MidiMessage& msg)
         return;
     }
 
+    const float velocity{ (float)msg.getVelocity() / 127.0f };
+
     Voice::Trigger trigger{};
     trigger.key = msg.getNoteNumber();
-    trigger.velocity = (float)msg.getVelocity() / 127.0f;
+    trigger.velocity = velocity;
     trigger.envelope.sampleRate = INTERNAL_SAMPLE_RATE;
-    trigger.envelope.attack = envelopeAttack * (3.0f - 2.0f * parameters[PARAM_EXPRESSION].getTargetValue());
+    trigger.envelope.attack = envelopeAttack * (3.0f - 2.0f * velocity * parameters[PARAM_EXPRESSION].getTargetValue());
     trigger.envelope.decay = envelopeDecay;
     trigger.envelope.sustain = envelopeSustain;
     trigger.envelope.release = envelopeRelease;

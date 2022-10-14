@@ -192,6 +192,40 @@ void SingingTromboneProcessor::processMidi(MidiBuffer& midiMessages)
 
     for (auto msgIter : midiMessages) {
         const auto msg{ msgIter.getMessage() };
+
+        if (msg.isController()) {
+            const float value{ float(msg.getControllerValue()) / 127.0f };
+
+            switch (msg.getControllerNumber()) {
+                case 1: // Modulation
+                    parameters.vibratoIntensity->setValueNotifyingHost(value);
+                    break;
+                case 7: // Volume
+                    parameters.volume->setValueNotifyingHost(value);
+                    break;
+                case 11:    // Expression
+                    parameters.expression->setValueNotifyingHost(value);
+                    break;
+                case 72:    // Release
+                    parameters.envelopeRelease->setValueNotifyingHost(value);
+                    break;
+                case 73:    // Attack
+                    parameters.envelopeAttack->setValueNotifyingHost(value);
+                    break;
+                case 80:    // Decay
+                    parameters.envelopeDecay->setValueNotifyingHost(value);
+                    break;
+                case 126:   // Mono mode
+                    parameters.legatoEnabled->setValueNotifyingHost(true);
+                    break;
+                case 127:   // Poly mode
+                    parameters.legatoEnabled->setValueNotifyingHost(false);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         engine.processMidiMessage(msg);
     }
 }

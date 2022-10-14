@@ -6,8 +6,7 @@ using namespace juce;
 SingingTromboneEditor::SingingTromboneEditor (SingingTromboneProcessor& p)
     : AudioProcessorEditor(&p),
       audioProcessor(p),
-      lyricsEditor(audioProcessor.getLyricsDocument(), nullptr),
-      updateButton("Update")
+      lyricsEditor(audioProcessor.getLyricsDocument(), nullptr)
 {
     setSize(600, 400);
     setResizeLimits(200, 200, 4096, 4096);

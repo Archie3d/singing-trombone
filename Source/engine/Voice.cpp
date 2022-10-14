@@ -142,7 +142,7 @@ void Voice::release()
     } else {
         // There is no release portion in the phrase
         envelope.release();
-        voiceProcessor.release();
+        //voiceProcessor.release();
     }
 }
 
@@ -151,9 +151,9 @@ void Voice::process(float* outL, float* outR, size_t numFrames)
     voiceProcessor.setVibrato(engine.getParameters()[Engine::PARAM_VIBRATO].getCurrentValue());
     voiceProcessor.process(outL, (int)numFrames);
 
-    // Apply envelope
+    // Apply envelope and velocity
     for (size_t i = 0; i < numFrames; ++i) {
-        outL[i] *= envelope.getNext();
+        outL[i] *= envelope.getNext() * triggerRecord.velocity;
     }
 
     if (outR != outL)
@@ -196,6 +196,9 @@ void Voice::process(float* outL, float* outR, size_t numFrames)
             }
         }
     }
+
+    if (isOver())
+        voiceProcessor.release();
 }
 
 bool Voice::isReleasing() const

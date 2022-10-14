@@ -35,7 +35,7 @@ private:
     SingingTromboneProcessor& audioProcessor;
 
     CodeEditorComponent lyricsEditor;
-    TextButton updateButton;
+    TextButton updateButton{ "Update lyrics "};
 
     Slider volumeSlider{ Slider::LinearVertical, Slider::NoTextBox };
     Slider expressionSlider{ Slider::LinearVertical, Slider::NoTextBox };
