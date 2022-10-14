@@ -197,7 +197,7 @@ void Tract::tick(float glottalOutput, float turbulenceNoise, float lambda, Glott
 
 void Tract::finishBlock()
 {
-    reshapeTract (blockTime);
+    reshapeTract(blockTime);
     calculateReflections();
     memcpy(config.tractDiameter.data(), diameter.data(), sizeof (float) * config.n);
     memcpy(config.noseDiameter.data(), noseDiameter.data(), sizeof (float) * config.noseLength);
@@ -245,7 +245,7 @@ void Tract::setConstriction(float cindex, float cdiam, float fi)
     if (constrictionDiameter < -0.85f - config.noseOffset)
         return;
 
-    float d = jmax (0.0f, constrictionDiameter - 0.3f);
+    float d = jmax(0.0f, constrictionDiameter - 0.3f);
 
     int width{ 2 };
 
