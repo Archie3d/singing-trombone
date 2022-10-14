@@ -63,8 +63,10 @@ public:
     CodeDocument& getLyricsDocument() { return lyricsDocument; }
 
     Result updateLyrics();
-    void setLegato(bool legato);
-    bool isLegato() const;
+
+    void updateParameters();
+
+    PluginParameters& getParametersContainer() { return parameters; }
 
 private:
 

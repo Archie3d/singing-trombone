@@ -12,6 +12,18 @@ public:
 
     String lyrics{};
 
+    AudioParameterFloat* volume{};
+    AudioParameterFloat* expression{};
+
+    AudioParameterFloat* envelopeAttack{};
+    AudioParameterFloat* envelopeDecay{};
+    AudioParameterFloat* envelopeSustain{};
+    AudioParameterFloat* envelopeRelease{};
+
+    AudioParameterFloat* vibratoIntensity{};
+
+    AudioParameterBool* legatoEnabled{};
+
 private:
     AudioProcessor& processor;
 };

@@ -71,6 +71,17 @@ float Parameter::getNextValue()
     return currentValue;
 }
 
+float Parameter::getNextValue(size_t numFrames)
+{
+    float v{ currentValue };
+
+    for (size_t i = 0; i < numFrames && smoothing; ++i) {
+        v = getNextValue();
+    }
+
+    return v;
+}
+
 void Parameter::updateSmoothing()
 {
     smoothing = fabsf(currentValue - targetValue) > std::numeric_limits<float>::epsilon();

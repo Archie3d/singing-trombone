@@ -5,6 +5,9 @@ namespace engine {
 Engine::Engine()
     : voicePool(*this)
 {
+    parameters[PARAM_VOLUME].setValue(1.0f, true);
+    parameters[PARAM_EXPRESSION].setValue(1.0f, true);
+    parameters[PARAM_VIBRATO].setValue(0.0f, true);
 }
 
 void Engine::prepareToPlay(float sr, int samplesPerBlock)
@@ -53,8 +56,6 @@ void Engine::process(float* outL, float* outR, size_t numFrames)
             jassert(remainedSamples > 0);
         }
     }
-
-    updateParameters(numFrames);
 }
 
 void Engine::processMidiMessage(const MidiMessage& msg)
@@ -148,7 +149,10 @@ void Engine::performHousekeeping()
 
 void Engine::updateParameters(size_t numFrames)
 {
-    // @todo
+    // Here we update parameters that do not get per-sample integration,
+    // so they get updates once per block instead.
+
+    parameters[PARAM_VIBRATO].getNextValue(numFrames);
 }
 
 void Engine::noteOn(const MidiMessage& msg)
@@ -164,16 +168,13 @@ void Engine::noteOn(const MidiMessage& msg)
     trigger.key = msg.getNoteNumber();
     trigger.velocity = (float)msg.getVelocity() / 127.0f;
     trigger.envelope.sampleRate = INTERNAL_SAMPLE_RATE;
-    trigger.envelope.attack = 0.3f;
-    trigger.envelope.decay = 0.1f;
-    trigger.envelope.sustain = 0.75f;
-    trigger.envelope.release = 0.3f;
+    trigger.envelope.attack = envelopeAttack * (3.0f - 2.0f * parameters[PARAM_EXPRESSION].getTargetValue());
+    trigger.envelope.decay = envelopeDecay;
+    trigger.envelope.sustain = envelopeSustain;
+    trigger.envelope.release = envelopeRelease;
 
     trigger.phrase = lyrics[phraseIndex];
     phraseIndex = (phraseIndex + 1) % lyricsNumPhrases;
-
-    // @todo Populate tenseness from global parameters
-    trigger.phrase.tenseness = 0.6f;
 
     bool triggered{ false };
 
@@ -236,6 +237,8 @@ void Engine::releaseSustainedVoices()
 
 void Engine::processSubFrame()
 {
+    updateParameters(SUB_FRAME_LENGTH);
+
     subFrameBuffer.clear();
     mixBuffer.clear();
 
@@ -262,6 +265,16 @@ void Engine::processSubFrame()
             voice = voice->next();
         }
 
+    }
+
+    // Apply volume and expression
+    for (size_t i = 0; i < SUB_FRAME_LENGTH; ++i) {
+        const float volume{ parameters[PARAM_VOLUME].getNextValue() };
+        const float expression{ parameters[Engine::PARAM_EXPRESSION].getNextValue() };
+        const float gain{ volume * (0.2f + expression * expression) / 1.2f };
+
+        outL[i] *= gain;
+        outR[i] *= gain;
     }
 
     remainedSamples = SUB_FRAME_LENGTH;

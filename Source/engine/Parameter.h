@@ -26,6 +26,7 @@ public:
     bool isSmoothing() const noexcept { return smoothing || currentValue != targetValue; }
 
     float getNextValue();
+    float getNextValue(size_t numFrames);
 
     float& targetRef() noexcept { return targetValue; }
 

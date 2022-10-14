@@ -5,6 +5,7 @@
 namespace engine {
 
 const static std::map<char, model::VoiceProcessor::ControlPoint> phonemes {
+  /*         tongX  tongY  consX  consY  tens     */
     { 'a', { 0.20f, 0.19f, 0.80f, 0.00f, 0.60f } },
     { 'i', { 1.00f, 0.05f, 0.76f, 0.68f, 0.60f } },
     { 'y', { 1.00f, 0.20f, 0.50f, 0.70f, 0.60f } },
@@ -99,7 +100,6 @@ void Voice::trigger(const Trigger& t)
     totalSamplesInPhoneme = Engine::INTERNAL_SAMPLE_RATE * triggerRecord.phrase.attack[0].duration;
 
     voiceProcessor.setFrequency(getNoteFrequency(triggerRecord.key), true);
-    voiceProcessor.setTenseness(triggerRecord.phrase.tenseness);
 
     const auto cp{ getControlPointForPhoneme(triggerRecord.phrase.attack[0].symbol) };
     voiceProcessor.trigger(cp);
@@ -119,7 +119,6 @@ void Voice::retrigger(const Trigger& t)
     totalSamplesInPhoneme = Engine::INTERNAL_SAMPLE_RATE * triggerRecord.phrase.attack[0].duration;
 
     voiceProcessor.setFrequency(getNoteFrequency(triggerRecord.key), false);
-    voiceProcessor.setTenseness(triggerRecord.phrase.tenseness);
 
     const auto cp{ getControlPointForPhoneme(triggerRecord.phrase.attack[0].symbol) };
     voiceProcessor.retrigger(cp);
@@ -137,6 +136,8 @@ void Voice::release()
 
         const auto cp{ getControlPointForPhoneme(triggerRecord.phrase.release[0].symbol) };
         voiceProcessor.setControlPoint(cp);
+
+        // Cancel vibrato on release
         voiceProcessor.setVibrato(0.0f);
     } else {
         // There is no release portion in the phrase
@@ -147,6 +148,7 @@ void Voice::release()
 
 void Voice::process(float* outL, float* outR, size_t numFrames)
 {
+    voiceProcessor.setVibrato(engine.getParameters()[Engine::PARAM_VIBRATO].getCurrentValue());
     voiceProcessor.process(outL, (int)numFrames);
 
     // Apply envelope
@@ -189,7 +191,7 @@ void Voice::process(float* outL, float* outR, size_t numFrames)
             } else {
                 // Release on the last phoneme
                 envelope.release();
-                voiceProcessor.release();
+                //voiceProcessor.release();
                 generatedSamplesInPhoneme = 0;
             }
         }

@@ -154,6 +154,8 @@ void SingingTromboneProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
         timeInSamples = pos.timeInSamples;
     }
 
+    updateParameters();
+
     const auto totalNumInputChannels { getTotalNumInputChannels() };
     const auto totalNumOutputChannels{ getTotalNumOutputChannels() };
 
@@ -221,6 +223,7 @@ void SingingTromboneProcessor::setStateInformation (const void* data, int sizeIn
 
     lyricsDocument.replaceAllContent(parameters.lyrics);
     updateLyrics();
+    updateParameters();
 
     listeners.call(&Listener::processorStateChanged);
 }
@@ -230,14 +233,17 @@ Result SingingTromboneProcessor::updateLyrics()
     return engine.setLyrics(lyricsDocument.getAllContent());
 }
 
-void SingingTromboneProcessor::setLegato(bool legato)
+void SingingTromboneProcessor::updateParameters()
 {
-    engine.setLegato(legato);
-}
+    engine.setVolume(parameters.volume->get());
+    engine.setExpression(parameters.expression->get());
+    engine.setEnvelopeAttack(parameters.envelopeAttack->get());
+    engine.setEnvelopeDecay(parameters.envelopeDecay->get());
+    engine.setEnvelopeSustain(parameters.envelopeSustain->get());
+    engine.setEnvelopeRelease(parameters.envelopeRelease->get());
 
-bool SingingTromboneProcessor::isLegato() const
-{
-    return engine.isLegato();
+    engine.setLegato(parameters.legatoEnabled->get());
+    engine.setVibrato(parameters.vibratoIntensity->get());
 }
 
 //==============================================================================

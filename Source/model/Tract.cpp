@@ -228,7 +228,7 @@ void Tract::setRestDiameter(float tongueIndex, float tongueDiameter)
         targetDiameter[i] = restDiameter[i];
 }
 
-void Tract::setConstriction (float cindex, float cdiam, float fi)
+void Tract::setConstriction(float cindex, float cdiam, float fi)
 {
     const float k{ float(config.n) / float(Config::defaultNumSegments) };
 
@@ -441,7 +441,7 @@ void Tract::reshapeTract(float deltaTime)
     }
 
     if (lastObstruction > -1 && newLastObstruction == -1 && noseA[0] < 0.05f)
-        addTransient (lastObstruction);
+        addTransient(lastObstruction);
 
     lastObstruction = newLastObstruction;
 

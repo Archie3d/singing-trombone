@@ -42,8 +42,6 @@ public:
         std::array<Phoneme, MAX_PHONEMES_PER_PHRASE> release{};
         size_t numReleasePhonemes{};
 
-        float tenseness{ 0.6f };
-
         void parse(const String& a, const String& r);
     };
 

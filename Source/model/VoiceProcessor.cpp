@@ -31,21 +31,16 @@ void VoiceProcessor::setControlPoint(const VoiceProcessor::ControlPoint& cp)
 void VoiceProcessor::trigger(const VoiceProcessor::ControlPoint& cp)
 {
     setControlPoint(cp);
-
-    tongueX = cp.tongueX;
-    tongueY = cp.tongueY;
-    constrictionX = cp.constrictionX;
-    constrictionY = cp.constrictionY;
+    updateControlPoint();
 
     glottis.reset();
     tract.reset();
 
-    setTenseness(cp.tenseness);
-
     fricativeIntensity = 0.0f;
 
-    glottis.setTouched(true);
+    glottis.setTenseness(cp.tenseness);
     glottis.setVibrato(0.0f);
+    glottis.setTouched(true);
 
     update();
 }
@@ -54,21 +49,8 @@ void VoiceProcessor::retrigger(const VoiceProcessor::ControlPoint& cp)
 {
     setControlPoint(cp);
 
-    //tongueX = cp.tongueX;
-    //tongueY = cp.tongueY;
-    //constrictionX = cp.constrictionX;
-    //constrictionY = cp.constrictionY;
-
-    //glottis.reset();
-    //tract.reset();
-
-    setTenseness(cp.tenseness);
-
+    glottis.setTenseness(cp.tenseness);
     glottis.setTouched(true);
-
-    //fricativeIntensity = 0.0f;
-
-    //update();
 }
 
 void VoiceProcessor::release()
@@ -113,11 +95,6 @@ void VoiceProcessor::setVibrato(float level)
     glottis.setVibrato(level);
 }
 
-void VoiceProcessor::setTenseness(float t)
-{
-    glottis.setTenseness(t);
-}
-
 void VoiceProcessor::update()
 {
     const float tongueIndex{ tongueX * ((float)(tract.getTongueIndexUpperBound() - tract.getTongueIndexLowerBound())) + tract.getTongueIndexLowerBound() };
@@ -151,7 +128,7 @@ void VoiceProcessor::updateControlPoint()
     tongueY = targetControlPoint.tongueY;
     constrictionX = targetControlPoint.constrictionX;
     constrictionY = targetControlPoint.constrictionY;
-    setTenseness(targetControlPoint.tenseness);
+    glottis.setTenseness(targetControlPoint.tenseness);
 }
 
 } // namespace model

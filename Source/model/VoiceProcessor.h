@@ -31,7 +31,6 @@ public:
 
     void setFrequency(float f, bool force = false);
     void setVibrato(float level);
-    void setTenseness(float t);
 
 private:
 
