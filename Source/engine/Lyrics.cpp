@@ -85,8 +85,6 @@ Result Lyrics::parse(const String& str)
         int stopPos{ pos };
         String s{ str.substring(startPos, stopPos) };
 
-        DBG("   -> '" << s << "'");
-
         if (!s.isEmpty()) {
             Phrase phrase{};
             phrase.position = Range<int>(startPos, stopPos);
@@ -96,7 +94,7 @@ Result Lyrics::parse(const String& str)
             if (tokens.size() > 0)
                 phrase.attack = tokens[0].trim().toLowerCase();
             if (tokens.size() > 1)
-                phrase.release = tokens[1].trim();
+                phrase.release = tokens[1].trim().toLowerCase();
 
             phrases.push_back(std::move(phrase));
         }

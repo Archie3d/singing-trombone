@@ -7,7 +7,8 @@ class SingingTromboneEditor : public juce::AudioProcessorEditor,
                               public juce::Timer,
                               public SingingTromboneProcessor::Listener,
                               public Slider::Listener,
-                              public Button::Listener
+                              public Button::Listener,
+                              public CodeDocument::Listener
 {
 public:
     SingingTromboneEditor (SingingTromboneProcessor&);
@@ -30,9 +31,20 @@ public:
     // Button::Listener
     void buttonClicked(Button* b) override;
 
+    // CodeDocument::Listener
+    void codeDocumentTextInserted(const String& newText, int insertIndex) override;
+    void codeDocumentTextDeleted(int startIndex, int endIndex) override;
+
 private:
 
+    void onLyricsChanged();
+
     SingingTromboneProcessor& audioProcessor;
+
+    Label loadLabel{ {}, { "CPU load:"} };
+    Label loadValueLabel{};
+    Label voicesLabel{ {}, { "Voices:"} };
+    Label voicesValueLabel{};
 
     CodeEditorComponent lyricsEditor;
     TextButton updateButton{ "Update lyrics "};
@@ -49,6 +61,7 @@ private:
 
     ToggleButton legatoToggleButton{ "Legato" };
 
+    bool lyricsChanged{};
     Range<int> highlightRegion{};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SingingTromboneEditor)

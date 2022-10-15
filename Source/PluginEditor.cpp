@@ -1,4 +1,5 @@
 #include "PluginProcessor.h"
+#include "LookAndFeel.h"
 #include "PluginEditor.h"
 
 using namespace juce;
@@ -8,13 +9,15 @@ SingingTromboneEditor::SingingTromboneEditor (SingingTromboneProcessor& p)
       audioProcessor(p),
       lyricsEditor(audioProcessor.getLyricsDocument(), nullptr)
 {
+    setLookAndFeel(&CustomLookAndFeel::getInstance());
+
     setSize(600, 400);
-    setResizeLimits(200, 200, 4096, 4096);
+    setResizeLimits(600, 400, 4096, 4096);
 
     lyricsEditor.setScrollbarThickness(8);
     addAndMakeVisible(lyricsEditor);
     addAndMakeVisible(updateButton);
-    
+
     auto& params{ audioProcessor.getParametersContainer() };
 
     volumeSlider.setRange(params.volume->range.start, params.volume->range.end);
@@ -36,6 +39,14 @@ SingingTromboneEditor::SingingTromboneEditor (SingingTromboneProcessor& p)
     vibratoSlider.addListener(this);
     legatoToggleButton.addListener(this);
 
+    loadValueLabel.setColour(Label::textColourId, Colours::lightpink);
+    voicesValueLabel.setColour(Label::textColourId, Colours::lightpink);
+
+    addAndMakeVisible(loadLabel);
+    addAndMakeVisible(loadValueLabel);
+    addAndMakeVisible(voicesLabel);
+    addAndMakeVisible(voicesValueLabel);
+
     addAndMakeVisible(volumeSlider);
     addAndMakeVisible(expressionSlider);
     addAndMakeVisible(attackSlider);
@@ -45,6 +56,7 @@ SingingTromboneEditor::SingingTromboneEditor (SingingTromboneProcessor& p)
     addAndMakeVisible(vibratoSlider);
     addAndMakeVisible(legatoToggleButton);
 
+    updateButton.setEnabled(false);
     updateButton.onClick = [this]() {
         updateLyrics();
     };
@@ -52,6 +64,7 @@ SingingTromboneEditor::SingingTromboneEditor (SingingTromboneProcessor& p)
     resized();
 
     audioProcessor.addListener(this);
+    audioProcessor.getLyricsDocument().addListener(this);
 
     startTimerHz(10);
 }
@@ -59,16 +72,26 @@ SingingTromboneEditor::SingingTromboneEditor (SingingTromboneProcessor& p)
 SingingTromboneEditor::~SingingTromboneEditor()
 {
     audioProcessor.removeListener(this);
+    audioProcessor.getLyricsDocument().removeListener(this);
 }
 
 void SingingTromboneEditor::paint (juce::Graphics& g)
 {
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 void SingingTromboneEditor::resized()
 {
     auto bounds{ getLocalBounds() };
+    auto top{ bounds.removeFromTop(32) };
+
+    top.removeFromLeft(6);
+    loadLabel.setBounds(top.removeFromLeft(80));
+    loadValueLabel.setBounds(top.removeFromLeft(60));
+    top.removeFromLeft(6);
+    voicesLabel.setBounds(top.removeFromLeft(70));
+    voicesValueLabel.setBounds(top.removeFromLeft(60));
+
     auto bottom{ bounds.removeFromBottom(80) };
     bottom.reduce(6, 6);
 
@@ -95,10 +118,17 @@ void SingingTromboneEditor::updateLyrics()
     if (res.failed()) {
         AlertWindow::showMessageBoxAsync(MessageBoxIconType::WarningIcon, "Error", res.getErrorMessage(), "OK");
     }
+
+    lyricsChanged = false;
+    updateButton.setEnabled(false);
 }
 
 void SingingTromboneEditor::timerCallback()
 {
+    int load{ int(100.0f * audioProcessor.getProcessLoad()) };
+    loadValueLabel.setText(String(load) + "%", dontSendNotification);
+    voicesValueLabel.setText(String(audioProcessor.getActiveVoiceCount()), dontSendNotification);
+
     auto& params{ audioProcessor.getParametersContainer() };
     volumeSlider.setValue(params.volume->get(), dontSendNotification);
     expressionSlider.setValue(params.expression->get(), dontSendNotification);
@@ -110,18 +140,21 @@ void SingingTromboneEditor::timerCallback()
 
     legatoToggleButton.setToggleState(params.legatoEnabled->get(), dontSendNotification);
 
-    auto phrase{ audioProcessor.getCurrentLyricsPhrase() };
-    auto currentRegion{ lyricsEditor.getHighlightedRegion() };
+    if (!lyricsChanged) {
+        auto phrase{ audioProcessor.getCurrentLyricsPhrase() };
+        auto currentRegion{ lyricsEditor.getHighlightedRegion() };
 
-    if (highlightRegion != phrase.position) {
-        highlightRegion = phrase.position;
-        lyricsEditor.setHighlightedRegion(highlightRegion);
+        if (highlightRegion != phrase.position) {
+            highlightRegion = phrase.position;
+            lyricsEditor.setHighlightedRegion(highlightRegion);
+        }
     }
 }
 
 void SingingTromboneEditor::processorStateChanged()
 {
-    //
+    lyricsChanged = false;
+    updateButton.setEnabled(false);
 }
 
 void SingingTromboneEditor::sliderValueChanged(Slider* slider)
@@ -152,4 +185,20 @@ void SingingTromboneEditor::buttonClicked(Button* b)
     if (b == dynamic_cast<Button*>(&legatoToggleButton)) {
         params.legatoEnabled->setValueNotifyingHost(legatoToggleButton.getToggleState());
     }
+}
+
+void SingingTromboneEditor::codeDocumentTextInserted(const String& newText, int insertIndex)
+{
+    onLyricsChanged();
+}
+
+void SingingTromboneEditor::codeDocumentTextDeleted(int startIndex, int endIndex)
+{
+    onLyricsChanged();
+}
+
+void SingingTromboneEditor::onLyricsChanged()
+{
+    lyricsChanged = true;
+    updateButton.setEnabled(true);
 }

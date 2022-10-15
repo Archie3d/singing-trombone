@@ -273,14 +273,13 @@ void Engine::processSubFrame()
         } else {
             voice = voice->next();
         }
-
     }
 
     // Apply volume and expression
     for (size_t i = 0; i < SUB_FRAME_LENGTH; ++i) {
         const float volume{ parameters[PARAM_VOLUME].getNextValue() };
         const float expression{ parameters[Engine::PARAM_EXPRESSION].getNextValue() };
-        const float gain{ volume * (0.2f + expression * expression) / 1.2f };
+        const float gain{ volume * (0.1f + expression * expression) / 1.1f };
 
         outL[i] *= gain;
         outR[i] *= gain;
