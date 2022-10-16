@@ -52,8 +52,8 @@ void PluginParameters::serialize(OutputStream& os) const
     obj->setProperty(attr::vibrato, vibratoIntensity->get());
     obj->setProperty(attr::legato, legatoEnabled->get());
 
-    DBG("Serialize parameters:");
-    DBG(JSON::toString(obj.get()));
+    //DBG("Serialize parameters:");
+    //DBG(JSON::toString(obj.get()));
 
     JSON::writeToStream(os, obj.get());
 }
@@ -62,7 +62,7 @@ void PluginParameters::deserialize(InputStream& is)
 {
     const auto state{ JSON::parse(is) };
 
-    DBG(JSON::toString(state));
+    //DBG(JSON::toString(state));
 
     if (const auto* obj{ state.getDynamicObject()} ) {
         lyrics = obj->getProperty(attr::lyrics).toString();
