@@ -4,7 +4,8 @@ This is an experiment on trynig to turn the [Pink Trombone](https://dood.al/pink
 
 ## Sound examples
 :warning: Beware, it does not sound particularly good :wink:
-- [Video](https://www.youtube.com/watch?v=7JDCJf--9zw)
+- [Lilium](https://youtu.be/7JDCJf--9zw)
+- [Stabat Mater](https://youtu.be/yag38MzwbmI)
 
 ## Description
 The plugin takes a text input that it will sing over. A text is composed of individual phrases separated by spaced (or new lines). Each phrase consists of one or two parts - attack and optional release separated bydash `-` character. On each midi note-on event the plugin vocalizes the attack part of the next phrase. The last phoneme gets sustained as the note is held. On node-off the release part gets vocalized (if present). The last phoneme of the release part will decay with the envelope release.
