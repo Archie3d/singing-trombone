@@ -46,7 +46,7 @@ void PluginParameters::serialize(OutputStream& os) const
         env->setProperty(attr::sustain, envelopeSustain->get());
         env->setProperty(attr::release, envelopeRelease->get());
 
-        obj->setProperty(attr::envelope, env.getObject());
+        obj->setProperty(attr::envelope, env.get());
     }
 
     obj->setProperty(attr::vibrato, vibratoIntensity->get());

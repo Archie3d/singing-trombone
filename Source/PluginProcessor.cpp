@@ -144,14 +144,14 @@ void SingingTromboneProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
     juce::ScopedNoDenormals noDenormals;
 
     if (auto* playHead{ getPlayHead() }) {
-        AudioPlayHead::CurrentPositionInfo pos{};
-        playHead->getCurrentPosition(pos);
-
-        if (pos.timeInSamples < timeInSamples) {
-            engine.rewind();
+        if (auto pos{ playHead->getPosition() }; pos.hasValue()) {
+            if (auto ts{ pos->getTimeInSamples()}; ts.hasValue()) {
+                if (*ts < timeInSamples)
+                    engine.rewind();
+                
+                timeInSamples = *ts;
+            }    
         }
-
-        timeInSamples = pos.timeInSamples;
     }
 
     updateParameters();
