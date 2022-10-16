@@ -1,4 +1,4 @@
-# Singing Trombone
+# ![Singing Trombone](Resources/icons/icon64.png) Singing Trombone
 
 This is an experiment on trynig to turn the [Pink Trombone](https://dood.al/pinktrombone/) vocal synthesis model into a singing VST instrument.
 
